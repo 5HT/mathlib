@@ -13,13 +13,20 @@ def op (C : Type u₁) : Type u₁ := C
 
 notation C `ᵒᵖ`:80 := op C
 
-variables {C : Type u₁} [𝒞 : category.{u₁ v₁} C]
+variables {C : Type u₁}
+
+def op.mk (x : C) : Cᵒᵖ := x
+
+instance opposite.hom [has_hom.{u₁ v₁} C] : has_hom.{u₁ v₁} (Cᵒᵖ) :=
+{ hom     := λ X Y : C, Y ⟶ X,
+  comp    := λ _ _ _ f g, g ≫ f,
+  id      := λ X, 𝟙 X }
+
+variables [𝒞 : category.{u₁ v₁} C]
 include 𝒞
 
 instance opposite : category.{u₁ v₁} (Cᵒᵖ) :=
-{ hom  := λ X Y : C, Y ⟶ X,
-  comp := λ _ _ _ f g, g ≫ f,
-  id   := λ X, 𝟙 X }
+{ .. opposite.hom }
 
 def op_op : (Cᵒᵖ)ᵒᵖ ⥤ C :=
 { obj := λ X, X,
@@ -104,17 +111,36 @@ variable (C)
 
 /-- `functor.hom` is the hom-pairing, sending (X,Y) to X → Y, contravariant in X and covariant in Y. -/
 definition hom : (Cᵒᵖ × C) ⥤ (Type v₁) :=
-{ obj       := λ p, @category.hom C _ p.1 p.2,
+{ obj       := λ p, @has_hom.hom C _ p.1 p.2,
   map       := λ X Y f, λ h, f.1 ≫ h ≫ f.2,
-  map_id'   := by intros; ext; dsimp [category_theory.opposite]; simp,
-  map_comp' := by intros; ext; dsimp [category_theory.opposite]; simp }
+  map_id'   := by intros; ext; dsimp [category_theory.opposite,category_theory.opposite.hom]; simp,
+  map_comp' := by intros; ext; dsimp [category_theory.opposite,category_theory.opposite.hom]; simp }
 
-@[simp] lemma hom_obj (X : Cᵒᵖ × C) : (functor.hom C).obj X = @category.hom C _ X.1 X.2 := rfl
+@[simp] lemma hom_obj (X : Cᵒᵖ × C) : (functor.hom C).obj X = @has_hom.hom C _ X.1 X.2 := rfl
 @[simp] lemma hom_pairing_map {X Y : Cᵒᵖ × C} (f : X ⟶ Y) :
   (functor.hom C).map f = λ h, f.1 ≫ h ≫ f.2 := rfl
 
 end
 
 end functor
+
+omit 𝒞
+
+instance opposite.has_one [has_one C] : has_one (Cᵒᵖ) :=
+{ one := (1 : C) }
+
+instance opposite.has_mul [has_mul C] : has_mul (Cᵒᵖ) :=
+{ mul := λ x y, (y * x : C) }
+
+instance opposite.monoid [monoid C] : monoid (Cᵒᵖ) :=
+{ one := (1 : C),
+  mul := λ x y, (y * x : C),
+  mul_one := @one_mul C _,
+  one_mul := @mul_one C _,
+  mul_assoc := by intros; symmetry; apply @mul_assoc C }
+
+@[simp] lemma opposite.one_def [has_one C] : (1 : Cᵒᵖ) = (1 : C) := rfl
+
+@[simp] lemma opposite.mul_def [has_mul C] (xs ys : Cᵒᵖ) : xs * ys = (ys * xs : C) := rfl
 
 end category_theory

@@ -1189,6 +1189,36 @@ end
 | b []      l₂ := rfl
 | b (a::l₁) l₂ := by simp only [cons_append, foldr_cons, foldr_append b l₁ l₂]
 
+/- mfoldl, mfoldr -/
+
+section mfoldl_mfoldr
+
+variables {m : Type v → Type w} [monad m]
+
+@[simp] theorem mfoldl_nil (f : β → α → m β) {b} : mfoldl f b [] = pure b := rfl
+
+@[simp] theorem mfoldr_nil (f : α → β → m β) {b} : mfoldr f b [] = pure b := rfl
+
+@[simp] theorem mfoldl_cons {f : β → α → m β} {b a l} :
+  mfoldl f b (a :: l) = f b a >>= λ b', mfoldl f b' l := rfl
+
+@[simp] theorem mfoldr_cons {f : α → β → m β} {b a l} :
+  mfoldr f b (a :: l) = mfoldr f b l >>= f a := rfl
+
+variables  [is_lawful_monad m]
+
+@[simp] theorem mfoldl_append {α β} (f : α → β → m α) :
+  ∀ (a : α) (l₁ l₂ : list β), mfoldl f a (l₁++l₂) = mfoldl f a l₁ >>= λ x, mfoldl f x l₂
+| a []      l₂ := by simp only [nil_append,mfoldl,return] with functor_norm
+| a (b::l₁) l₂ := by simp only [cons_append,mfoldl_append,mfoldl] with functor_norm
+
+@[simp] theorem mfoldr_append (f : α → β → m β) :
+  ∀ (b : β) (l₁ l₂ : list α), mfoldr f b (l₁++l₂) = mfoldr f b l₂ >>= λ x, mfoldr f x l₁
+| a []      l₂ := by simp only [nil_append,mfoldr,return] with functor_norm
+| a (b::l₁) l₂ := by simp only [cons_append,mfoldr_append,mfoldr] with functor_norm
+
+end mfoldl_mfoldr
+
 @[simp] theorem foldl_join (f : α → β → α) :
   ∀ (a : α) (L : list (list β)), foldl f a (join L) = foldl (foldl f) a L
 | a []     := rfl
@@ -1271,35 +1301,6 @@ lemma foldl_assoc_comm_cons {l : list α} {a₁ a₂} : (a₁ :: l) <*> a₂ = a
 by rw [foldl_cons, hc.comm, foldl_assoc]
 
 end
-
-/- mfoldl, mfoldr -/
-
-section mfoldl_mfoldr
-variables {m : Type v → Type w} [monad m]
-
-@[simp] theorem mfoldl_nil (f : β → α → m β) {b} : mfoldl f b [] = pure b := rfl
-
-@[simp] theorem mfoldr_nil (f : α → β → m β) {b} : mfoldr f b [] = pure b := rfl
-
-@[simp] theorem mfoldl_cons {f : β → α → m β} {b a l} :
-  mfoldl f b (a :: l) = f b a >>= λ b', mfoldl f b' l := rfl
-
-@[simp] theorem mfoldr_cons {f : α → β → m β} {b a l} :
-  mfoldr f b (a :: l) = mfoldr f b l >>= f a := rfl
-
-variables [is_lawful_monad m]
-
-@[simp] theorem mfoldl_append {f : β → α → m β} : ∀ {b l₁ l₂},
-  mfoldl f b (l₁ ++ l₂) = mfoldl f b l₁ >>= λ x, mfoldl f x l₂
-| _ []     _ := by simp only [nil_append, mfoldl_nil, pure_bind]
-| _ (_::_) _ := by simp only [cons_append, mfoldl_cons, mfoldl_append, bind_assoc]
-
-@[simp] theorem mfoldr_append {f : α → β → m β} : ∀ {b l₁ l₂},
-  mfoldr f b (l₁ ++ l₂) = mfoldr f b l₂ >>= λ x, mfoldr f x l₁
-| _ []     _ := by simp only [nil_append, mfoldr_nil, bind_pure]
-| _ (_::_) _ := by simp only [mfoldr_cons, cons_append, mfoldr_append, bind_assoc]
-
-end mfoldl_mfoldr
 
 /- sum -/
 

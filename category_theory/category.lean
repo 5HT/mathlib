@@ -33,23 +33,26 @@ powerful tactics.
 def_replacer obviously
 @[obviously] meta def obviously' := tactic.tidy
 
+class has_hom (obj : Type u) : Type (max u (v+1)) :=
+(hom : obj → obj → Type v)
+(id       : Π X : obj, hom X X)
+(comp     : Π {X Y Z : obj}, hom X Y → hom Y Z → hom X Z)
+
 /--
 The typeclass `category C` describes morphisms associated to objects of type `C`.
 The universe levels of the objects and morphisms are unconstrained, and will often need to be
 specified explicitly, as `category.{u v} C`. (See also `large_category` and `small_category`.)
 -/
-class category (obj : Type u) : Type (max u (v+1)) :=
-(hom      : obj → obj → Type v)
-(id       : Π X : obj, hom X X)
-(comp     : Π {X Y Z : obj}, hom X Y → hom Y Z → hom X Z)
+class category (obj : Type u)
+extends has_hom.{u v} obj :=
 (id_comp' : ∀ {X Y : obj} (f : hom X Y), comp (id X) f = f . obviously)
 (comp_id' : ∀ {X Y : obj} (f : hom X Y), comp f (id Y) = f . obviously)
 (assoc'   : ∀ {W X Y Z : obj} (f : hom W X) (g : hom X Y) (h : hom Y Z),
   comp (comp f g) h = comp f (comp g h) . obviously)
 
-notation `𝟙` := category.id -- type as \b1
-infixr ` ≫ `:80 := category.comp -- type as \gg
-infixr ` ⟶ `:10 := category.hom -- type as \h
+notation `𝟙` := has_hom.id -- type as \b1
+infixr ` ≫ `:80 := has_hom.comp -- type as \gg
+infixr ` ⟶ `:10 := has_hom.hom -- type as \h
 
 -- `restate_axiom` is a command that creates a lemma from a structure field,
 -- discarding any auto_param wrappers from the type.
@@ -58,7 +61,7 @@ restate_axiom category.id_comp'
 restate_axiom category.comp_id'
 restate_axiom category.assoc'
 attribute [simp] category.id_comp category.comp_id category.assoc
-attribute [trans] category.comp
+attribute [trans] has_hom.comp
 
 lemma category.assoc_symm {C : Type u} [category.{u v} C] {W X Y Z : C} (f : W ⟶ X) (g : X ⟶ Y) (h : Y ⟶ Z) :
   f ≫ (g ≫ h) = (f ≫ g) ≫ h :=
@@ -157,12 +160,19 @@ instance [preorder α] : small_category α :=
   comp := λ X Y Z f g, ⟨ ⟨ le_trans f.down.down g.down.down ⟩ ⟩ }
 
 section
-variables {C : Type u} [𝒞 : category.{u v} C]
-include 𝒞
+variables {C : Type u}
 
-def End (X : C) := X ⟶ X
+def End [has_hom.{u v} C] (X : C) := X ⟶ X
 
-instance {X : C} : monoid (End X) := by refine { one := 𝟙 X, mul := λ x y, x ≫ y, .. } ; obviously
+instance End.has_one [has_hom.{u v} C] {X : C} : has_one (End X) := by refine { one := 𝟙 X }
+instance End.has_mul [has_hom.{u v} C] {X : C} : has_mul (End X) := by refine { mul := λ x y, x ≫ y }
+instance End.monoid [category.{u v} C] {X : C} : monoid (End X) :=
+by refine { .. End.has_one, .. End.has_mul, .. }; dsimp [has_mul.mul,has_one.one]; obviously
+
+@[simp] lemma End.one_def {C : Type u} [category.{u v} C] {X : C} : (1 : End X) = 𝟙 X := rfl
+
+@[simp] lemma End.mul_def {C : Type u} [category.{u v} C] {X : C} (xs ys : End X) : xs * ys = xs ≫ ys := rfl
+
 end
 
 end category_theory

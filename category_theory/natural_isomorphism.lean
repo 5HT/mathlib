@@ -127,8 +127,8 @@ variables {C : Type u₁} [𝒞 : category.{u₁ v₁} C]
 include 𝒞
 
 def ulift_down_up : ulift_down.{u₁ v₁ u₂} C ⋙ ulift_up C ≅ functor.id (ulift.{u₂} C) :=
-{ hom := { app := λ X, @category.id (ulift.{u₂} C) _ X },
-  inv := { app := λ X, @category.id (ulift.{u₂} C) _ X } }
+{ hom := { app := λ X, @has_hom.id (ulift.{u₂} C) _ X },
+  inv := { app := λ X, @has_hom.id (ulift.{u₂} C) _ X } }
 
 def ulift_up_down : ulift_up.{u₁ v₁ u₂} C ⋙ ulift_down C ≅ functor.id C :=
 { hom := { app := λ X, 𝟙 X },

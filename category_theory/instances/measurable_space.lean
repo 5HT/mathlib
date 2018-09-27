@@ -5,14 +5,14 @@ Authors: Johannes Hölzl
 Basic setup for measurable spaces.
 -/
 
-import category_theory.examples.topological_spaces
+import category_theory.instances.topological_spaces
 import category_theory.types
 import analysis.measure_theory.borel_space
 
 open category_theory
 universes u v
 
-namespace category_theory.examples
+namespace category_theory.instances
 
 @[reducible] def Meas : Type (u+1) := bundled measurable_space
 
@@ -30,4 +30,4 @@ end Meas
 def Borel : Top ⥤ Meas :=
 concrete_functor @measure_theory.borel @measure_theory.measurable_of_continuous
 
-end category_theory.examples
+end category_theory.instances

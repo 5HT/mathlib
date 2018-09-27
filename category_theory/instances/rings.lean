@@ -7,15 +7,16 @@ Introduce CommRing -- the category of commutative rings.
 Currently only the basic setup.
 -/
 
-import category_theory.examples.monoids
+import category_theory.instances.monoids
 import category_theory.fully_faithful
+
 import algebra.ring
 
 universes u v
 
 open category_theory
 
-namespace category_theory.examples
+namespace category_theory.instances
 
 /-- The category of rings. -/
 @[reducible] def Ring : Type (u+1) := bundled ring
@@ -59,4 +60,4 @@ instance : faithful (forget_to_CommMon) := {}
 example : faithful (forget_to_CommMon ⋙ CommMon.forget_to_Mon) := by apply_instance
 end CommRing
 
-end category_theory.examples
+end category_theory.instances
