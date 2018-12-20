@@ -12,9 +12,9 @@ universes u₁ v₁ u₂ v₂ v
 -- Without marking this as irreducible, Lean is just too helpful for its own good,
 -- passing back and forth between a category and its opposite.
 -- Broken proofs become very difficult to debug.
-def op_cat (C : Type u₁) : Type u₁ := C
+def opposite (C : Type u₁) : Type u₁ := C
 
-notation C `ᵒᵖ`:80 := op_cat C
+notation C `ᵒᵖ`:80 := opposite C
 
 variables {C : Type u₁}
 
@@ -23,12 +23,12 @@ def unop (X : Cᵒᵖ) : C := X
 @[simp] lemma unop_op (X : C) : unop (op X) = X := rfl
 @[simp] lemma op_unop (X : Cᵒᵖ) : op (unop X) = X := rfl
 
-attribute [irreducible] op_cat
+attribute [irreducible] opposite
 
 variables (C) [𝒞 : category.{u₁ v₁} C]
 include 𝒞
 
-instance opposite : category.{u₁ v₁} (Cᵒᵖ) :=
+instance opposite_category : category.{u₁ v₁} (Cᵒᵖ) :=
 { hom  := λ X Y : Cᵒᵖ, (unop Y) ⟶ (unop X),
   comp := λ _ _ _ f g, g ≫ f,
   id   := λ X, 𝟙 (unop X) }
@@ -141,8 +141,8 @@ variable (C)
 def hom : (Cᵒᵖ × C) ⥤ (Type v₁) :=
 { obj       := λ X, (unop X.1) ⟶ X.2,
   map       := λ X Y f, λ h, f.1 ≫ h ≫ f.2,
-  map_id'   := by intros; ext; dsimp [category_theory.opposite]; simp,
-  map_comp' := by intros; ext; dsimp [category_theory.opposite]; simp }
+  map_id'   := begin intros, ext, dsimp [category_theory.opposite_category], simp end,
+  map_comp' := begin intros, ext, dsimp [category_theory.opposite_category], simp end }
 
 @[simp] lemma hom_obj (X : Cᵒᵖ × C) : (functor.hom C).obj X = ((unop X.1) ⟶ X.2) := rfl
 @[simp] lemma hom_pairing_map {X Y : Cᵒᵖ × C} (f : X ⟶ Y) :
