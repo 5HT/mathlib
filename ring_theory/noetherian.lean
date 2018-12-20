@@ -4,7 +4,6 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Mario Carneiro, Kevin Buzzard
 -/
 
-import algebra.module
 import order.order_iso
 import data.fintype data.polynomial
 import linear_algebra.lc
@@ -107,3 +106,30 @@ begin
   rw is_noetherian_iff_well_founded at h ⊢,
   convert order_embedding.well_founded (order_embedding.rsymm (submodule.comap_mkq.lt_order_embedding N)) h
 end
+
+namespace is_noetherian_ring
+
+variables {α : Type*} [integral_domain α] (hα : is_noetherian_ring α)
+include hα
+open associates nat
+
+local attribute [elab_as_eliminator] well_founded.fix
+
+lemma well_founded_dvd_not_unit : well_founded (λ a b : α, a ≠ 0 ∧ ∃ x, ¬is_unit x ∧ b = a * x ) :=
+by simp only [ideal.span_singleton_lt_span_singleton.symm];
+   exact inv_image.wf (λ a, ideal.span ({a} : set α))
+     (is_noetherian_iff_well_founded.1 hα)
+
+lemma exists_irreducible_factor {a : α} (ha : ¬ is_unit a) (ha0 : a ≠ 0) :
+  ∃ i, irreducible i ∧ i ∣ a :=
+(irreducible_or_factor a ha).elim (λ hai, ⟨a, hai, dvd_refl _⟩)
+  (well_founded.fix
+    (well_founded_dvd_not_unit hα)
+    (λ a ih ha ha0 ⟨x, y, hx, hy, hxy⟩,
+      have hx0 : x ≠ 0, from λ hx0, ha0 (by rw [← hxy, hx0, zero_mul]),
+      (irreducible_or_factor x hx).elim
+        (λ hxi, ⟨x, hxi, hxy ▸ by simp⟩)
+        (λ hxf, let ⟨i, hi⟩ := ih x ⟨hx0, y, hy, hxy.symm⟩ hx hx0 hxf in
+          ⟨i, hi.1, dvd.trans hi.2 (hxy ▸ by simp)⟩)) a ha ha0)
+
+end is_noetherian_ring
