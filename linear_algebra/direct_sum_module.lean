@@ -92,7 +92,7 @@ begin
       rw [(y.3 i).resolve_left H2, (φ i).map_zero] } }
 end
 
-theorem to_module_aux.smul (c f) :
+theorem to_module_aux.smul (c:R) (f) :
   to_module_aux φ (c • f) = c • to_module_aux φ f :=
 begin
   refine quotient.induction_on f (λ x, _),

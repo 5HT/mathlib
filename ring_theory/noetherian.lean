@@ -87,14 +87,14 @@ begin
     rw [lc.total_apply, lc.map_apply, finsupp.sum_map_domain_index],
     refine s.sum_mem _,
     { intros y hy, exact s.smul_mem _ (hg y (hl1 hy)).1 },
-    { exact zero_smul }, { exact λ _ _ _, add_smul _ _ _ } },
+    { exact zero_smul _ }, { exact λ _ _ _, add_smul _ _ _ } },
   { rw [linear_map.mem_ker, f.map_sub, ← hl2],
     rw [lc.total_apply, lc.total_apply, lc.map_apply],
     rw [finsupp.sum_map_domain_index, finsupp.sum, finsupp.sum, f.map_sum],
     rw sub_eq_zero,
     refine finset.sum_congr rfl (λ y hy, _),
     rw [f.map_smul, (hg y (hl1 hy)).2],
-    { exact zero_smul }, { exact λ _ _ _, add_smul _ _ _ } }
+    { exact zero_smul _ }, { exact λ _ _ _, add_smul _ _ _ } }
 end
 
 end submodule

@@ -404,7 +404,7 @@ span_eq_of_le _ (subset.refl _) subset_span
 @[elab_as_eliminator] lemma span_induction {p : β → Prop} (h : x ∈ span s)
   (Hs : ∀ x ∈ s, p x) (H0 : p 0)
   (H1 : ∀ x y, p x → p y → p (x + y))
-  (H2 : ∀ a x, p x → p (a • x)) : p x :=
+  (H2 : ∀ (a:α) x, p x → p (a • x)) : p x :=
 (@span_le _ _ _ _ _ _ ⟨p, H0, H1, H2⟩).2 Hs h
 
 variables (β)
@@ -486,7 +486,7 @@ by rintro ⟨y, hy, z, hz, rfl⟩; exact add_mem _
   ((le_sup_right : p' ≤ p ⊔ p') hz)⟩
 variables (p p')
 
-lemma mem_span_singleton {y : β} : x ∈ span ({y} : set β) ↔ ∃ a, a • y = x :=
+lemma mem_span_singleton {y : β} : x ∈ span ({y} : set β) ↔ ∃ a:α, a • y = x :=
 ⟨λ h, begin
   apply span_induction h,
   { rintro y (rfl|⟨⟨⟩⟩), exact ⟨1, by simp⟩ },
@@ -499,10 +499,10 @@ end,
 by rintro ⟨a, y, rfl⟩; exact
   smul_mem _ _ (subset_span $ by simp)⟩
 
-lemma span_singleton_eq_range (y : β) : (span ({y} : set β) : set β) = range (• y) :=
+lemma span_singleton_eq_range (y : β) : (span ({y} : set β) : set β) = range ((• y) : α → β) :=
 set.ext $ λ x, mem_span_singleton
 
-lemma mem_span_insert {y} : x ∈ span (insert y s) ↔ ∃ a (z ∈ span s), x = a • y + z :=
+lemma mem_span_insert {y} : x ∈ span (insert y s) ↔ ∃ (a:α) (z ∈ span s), x = a • y + z :=
 begin
   rw [← union_singleton, span_union, mem_sup],
   simp [mem_span_singleton], split,
@@ -510,7 +510,7 @@ begin
   { rintro ⟨a, z, hz, rfl⟩, exact ⟨z, hz, _, ⟨a, rfl⟩, rfl⟩ }
 end
 
-lemma mem_span_insert' {y} : x ∈ span (insert y s) ↔ ∃a, x + a • y ∈ span s :=
+lemma mem_span_insert' {y} : x ∈ span (insert y s) ↔ ∃(a:α), x + a • y ∈ span s :=
 begin
   rw mem_span_insert, split,
   { rintro ⟨a, z, hz, rfl⟩, exact ⟨-a, by simp [hz]⟩ },

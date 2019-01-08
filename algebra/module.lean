@@ -13,7 +13,7 @@ universes u v w x
 variables {α : Type u} {β : Type v} {γ : Type w} {δ : Type x}
 
 /-- Typeclass for types with a scalar multiplication operation, denoted `•` (`\bu`) -/
-class has_scalar (α : out_param $ Type u) (γ : Type v) := (smul : α → γ → γ)
+class has_scalar (α : Type u) (γ : Type v) := (smul : α → γ → γ)
 
 infixr ` • `:73 := has_scalar.smul
 
@@ -22,25 +22,26 @@ infixr ` • `:73 := has_scalar.smul
   connected by a "scalar multiplication" operation `r • x : β`
   (where `r : α` and `x : β`) with some natural associativity and
   distributivity axioms similar to those on a ring. -/
-class semimodule (α : out_param $ Type u) (β : Type v) [out_param $ semiring α]
+class semimodule (α : Type u) (β : Type v) [semiring α]
   [add_comm_monoid β] extends has_scalar α β :=
-(smul_add : ∀r (x y : β), r • (x + y) = r • x + r • y)
-(add_smul : ∀r s (x : β), (r + s) • x = r • x + s • x)
-(mul_smul : ∀r s (x : β), (r * s) • x = r • s • x)
+(smul_add : ∀(r : α) (x y : β), r • (x + y) = r • x + r • y)
+(add_smul : ∀(r s : α) (x : β), (r + s) • x = r • x + s • x)
+(mul_smul : ∀(r s : α) (x : β), (r * s) • x = r • s • x)
 (one_smul : ∀x : β, (1 : α) • x = x)
 (zero_smul : ∀x : β, (0 : α) • x = 0)
-(smul_zero {} : ∀r, r • (0 : β) = 0)
+(smul_zero {} : ∀(r : α), r • (0 : β) = 0)
 
 section semimodule
-variables {R:semiring α} [add_comm_monoid β] [semimodule α β] (r s : α) (x y : β)
+variables [R:semiring α] [add_comm_monoid β] [semimodule α β] (r s : α) (x y : β)
 include R
 
 theorem smul_add : r • (x + y) = r • x + r • y := semimodule.smul_add r x y
 theorem add_smul : (r + s) • x = r • x + s • x := semimodule.add_smul r s x
 theorem mul_smul : (r * s) • x = r • s • x := semimodule.mul_smul r s x
-@[simp] theorem one_smul : (1 : α) • x = x := semimodule.one_smul x
-@[simp] theorem zero_smul : (0 : α) • x = 0 := semimodule.zero_smul x
 @[simp] theorem smul_zero : r • (0 : β) = 0 := semimodule.smul_zero r
+variables (α)
+@[simp] theorem one_smul : (1 : α) • x = x := semimodule.one_smul α x
+@[simp] theorem zero_smul : (0 : α) • x = 0 := semimodule.zero_smul α x
 
 lemma smul_smul : r • s • x = (r * s) • x := (mul_smul _ _ _).symm
 
@@ -58,15 +59,15 @@ class module (α : out_param $ Type u) (β : Type v) [out_param $ ring α]
   [add_comm_group β] extends semimodule α β
 
 structure module.core (α β) [ring α] [add_comm_group β] extends has_scalar α β :=
-(smul_add : ∀r (x y : β), r • (x + y) = r • x + r • y)
-(add_smul : ∀r s (x : β), (r + s) • x = r • x + s • x)
-(mul_smul : ∀r s (x : β), (r * s) • x = r • s • x)
+(smul_add : ∀(r : α) (x y : β), r • (x + y) = r • x + r • y)
+(add_smul : ∀(r s : α) (x : β), (r + s) • x = r • x + s • x)
+(mul_smul : ∀(r s : α) (x : β), (r * s) • x = r • s • x)
 (one_smul : ∀x : β, (1 : α) • x = x)
 
 def module.of_core {α β} [ring α] [add_comm_group β] (M : module.core α β) : module α β :=
 by letI := M.to_has_scalar; exact
 { zero_smul := λ x,
-    have (0 : α) • x + 0 • x = 0 • x + 0, by rw ← M.add_smul; simp,
+    have (0 : α) • x + (0 : α) • x = (0 : α) • x + 0, by rw ← M.add_smul; simp,
     add_left_cancel this,
   smul_zero := λ r,
     have r • (0:β) + r • 0 = r • 0 + 0, by rw ← M.smul_add; simp,
@@ -111,15 +112,20 @@ class is_linear_map {α : Type u} {β : Type v} {γ : Type w}
   [ring α] [add_comm_group β] [add_comm_group γ] [module α β] [module α γ]
   (f : β → γ) : Prop :=
 (add  : ∀x y, f (x + y) = f x + f y)
-(smul : ∀c x, f (c • x) = c • f x)
+(smul : ∀(c : α) x, f (c • x) = c • f x)
 
 structure linear_map {α : Type u} (β : Type v) (γ : Type w)
   [ring α] [add_comm_group β] [add_comm_group γ] [module α β] [module α γ] :=
 (to_fun : β → γ)
 (add  : ∀x y, to_fun (x + y) = to_fun x + to_fun y)
-(smul : ∀c x, to_fun (c • x) = c • to_fun x)
+(smul : ∀(c : α) x, to_fun (c • x) = c • to_fun x)
+
+@[reducible] def linear_map' (α : Type u) (β : Type v) (γ : Type w)
+  [ring α] [add_comm_group β] [add_comm_group γ] [module α β] [module α γ] : Type (max v w) :=
+linear_map β γ
 
 infixr ` →ₗ `:25 := linear_map
+notation β ` →ₗ[`:25 α `] ` γ := linear_map' α β γ
 
 namespace linear_map
 
@@ -143,7 +149,7 @@ theorem ext_iff {f g : β →ₗ γ} : f = g ↔ ∀ x, f x = g x :=
 @[simp] lemma map_smul (c : α) (x : β) : f (c • x) = c • f x := f.smul c x
 
 @[simp] lemma map_zero : f 0 = 0 :=
-by rw [← zero_smul, map_smul f 0 0, zero_smul]
+by rw [← zero_smul α, map_smul f 0 0, zero_smul]
 
 instance : is_add_group_hom f := ⟨map_add f⟩
 
@@ -187,7 +193,7 @@ structure submodule (α : Type u) (β : Type v) {R:ring α}
 (carrier : set β)
 (zero : (0:β) ∈ carrier)
 (add : ∀ {x y}, x ∈ carrier → y ∈ carrier → x + y ∈ carrier)
-(smul : ∀ c {x}, x ∈ carrier → c • x ∈ carrier)
+(smul : ∀ (c:α) {x}, x ∈ carrier → c • x ∈ carrier)
 
 namespace submodule
 variables {R:ring α} [add_comm_group β] [add_comm_group γ]

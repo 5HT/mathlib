@@ -306,7 +306,7 @@ section normed_space
 
 class normed_space (α : out_param $ Type*) (β : Type*) [out_param $ normed_field α]
   extends normed_group β, vector_space α β :=
-(norm_smul : ∀ a b, norm (a • b) = has_norm.norm a * norm b)
+(norm_smul : ∀ (a:α) b, norm (a • b) = has_norm.norm a * norm b)
 
 variables [normed_field α]
 

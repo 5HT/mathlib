@@ -389,7 +389,7 @@ section
 local attribute [instance] to_module
 variables {γ : Type w} [ring γ] [Π i, add_comm_group (β i)] [Π i, module γ (β i)]
 include γ
-@[simp] lemma mk_smul {s : finset ι} {c : γ} {x : Π i : (↑s : set ι), β i.1} :
+@[simp] lemma mk_smul {s : finset ι} {c : γ} (x : Π i : (↑s : set ι), β i.1) :
   mk s (c • x) = c • mk s x :=
 ext $ λ i, by simp only [smul_apply, mk_apply]; split_ifs; [refl, rw smul_zero]
 
@@ -399,7 +399,7 @@ ext $ λ i, by simp only [smul_apply, single_apply]; split_ifs; [cases h, rw smu
 
 variable β
 def lmk (s : finset ι) : (Π i : (↑s : set ι), β i.1) →ₗ Π₀ i, β i :=
-⟨mk s, λ _ _, mk_add, λ _ _, mk_smul⟩
+⟨mk s, λ _ _, mk_add, λ c x, by rw [mk_smul x]⟩
 
 def lsingle (i) : β i →ₗ Π₀ i, β i :=
 ⟨single i, λ _ _, single_add, λ _ _, single_smul⟩

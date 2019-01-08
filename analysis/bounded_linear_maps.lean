@@ -57,7 +57,7 @@ lemma smul {f : E → F} (c : k) : is_bounded_linear_map f → is_bounded_linear
 
 lemma neg {f : E → F} (hf : is_bounded_linear_map f) : is_bounded_linear_map (λ e, -f e) :=
 begin
-  rw show (λ e, -f e) = (λ e, (-1) • f e), { funext, simp },
+  rw show (λ e, -f e) = (λ e, (-1 : k) • f e), { funext, simp },
   exact smul (-1) hf
 end
 

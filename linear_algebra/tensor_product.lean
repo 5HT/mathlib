@@ -64,7 +64,7 @@ theorem map_neg₂ (x y) : f (-x) y = -f x y := (flip f y).map_neg _
 
 theorem map_add₂ (x₁ x₂ y) : f (x₁ + x₂) y = f x₁ y + f x₂ y := (flip f y).map_add _ _
 
-theorem map_smul₂ (r x y) : f (r • x) y = r • f x y := (flip f y).map_smul _ _
+theorem map_smul₂ (r:R) (x y) : f (r • x) y = r • f x y := (flip f y).map_smul _ _
 
 variables (P)
 def lcomp (f : M →ₗ N) : (N →ₗ P) →ₗ M →ₗ P :=
@@ -99,7 +99,7 @@ linear_map.comp (llcomp N P Q g) f
 
 variables (R M)
 def lsmul : R →ₗ M →ₗ M :=
-mk₂ (•) add_smul (λ _ _ _, eq.symm $ smul_smul _ _ _) smul_add
+mk₂ (•) add_smul (λ _ _ _, eq.symm $ smul_smul _ _ _ _) smul_add
 (λ r s m, by simp only [smul_smul, smul_eq_mul, mul_comm])
 variables {R M}
 
@@ -274,7 +274,7 @@ local attribute [instance] quotient_add_group.left_rel normal_add_subgroup.to_is
 @[simp] lemma lift_aux.add (x y) : lift_aux f (x + y) = lift_aux f x + lift_aux f y :=
 quotient.induction_on₂ x y $ λ m n, free_abelian_group.lift.add _ _ _
 
-@[simp] lemma lift_aux.smul (r x) : lift_aux f (r • x) = r • lift_aux f x :=
+@[simp] lemma lift_aux.smul (r:R) (x) : lift_aux f (r • x) = r • lift_aux f x :=
 tensor_product.induction_on _ _ x (smul_zero _).symm
   (λ p q, by rw [← tmul_smul]; simp [lift_aux, tmul])
   (λ p q ih1 ih2, by simp [@smul_add _ _ _ _ _ _ p _,
